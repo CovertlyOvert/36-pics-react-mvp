@@ -15,10 +15,15 @@ const CameraScreen = () => {
   
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const [isTakingPhoto, setIsTakingPhoto] = useState(false);
+  const [isShutterActive, setIsShutterActive] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const shutterAudioRef = useRef<HTMLAudioElement | null>(null);
   
   useEffect(() => {
+    // Create audio element for shutter sound
+    shutterAudioRef.current = new Audio("/shutter-click.mp3");
+    
     // Ensure we have an active trip
     if (!activeTrip) {
       toast({
@@ -75,6 +80,17 @@ const CameraScreen = () => {
     setIsTakingPhoto(true);
     
     try {
+      // Play shutter sound
+      if (shutterAudioRef.current) {
+        shutterAudioRef.current.play().catch(err => console.error("Could not play shutter sound:", err));
+      }
+      
+      // Trigger shutter animation
+      setIsShutterActive(true);
+      
+      // Wait a moment for the shutter effect
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
       const video = videoRef.current;
       const canvas = canvasRef.current;
       
@@ -87,6 +103,9 @@ const CameraScreen = () => {
       if (!ctx) return;
       
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Apply vintage filter effect to the canvas
+      applyVintageEffect(ctx, canvas.width, canvas.height);
       
       // Convert canvas to data URL
       const photoData = canvas.toDataURL("image/jpeg");
@@ -112,6 +131,13 @@ const CameraScreen = () => {
         });
         navigate(`/gallery/${tripId}`);
       }
+      
+      // Reset shutter after a brief delay
+      setTimeout(() => {
+        setIsShutterActive(false);
+        setIsTakingPhoto(false);
+      }, 300);
+      
     } catch (error) {
       console.error("Error taking photo:", error);
       toast({
@@ -119,9 +145,56 @@ const CameraScreen = () => {
         description: "Failed to take photo",
         variant: "destructive",
       });
-    } finally {
+      setIsShutterActive(false);
       setIsTakingPhoto(false);
     }
+  };
+  
+  // Apply vintage effect to canvas
+  const applyVintageEffect = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    // Get image data
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+    
+    // Apply sepia effect
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      
+      // Sepia conversion
+      data[i] = Math.min(255, (r * 0.393) + (g * 0.769) + (b * 0.189));
+      data[i + 1] = Math.min(255, (r * 0.349) + (g * 0.686) + (b * 0.168));
+      data[i + 2] = Math.min(255, (r * 0.272) + (g * 0.534) + (b * 0.131));
+      
+      // Add subtle noise for film grain effect
+      if (Math.random() > 0.97) {
+        const noise = Math.random() * 20 - 10;
+        data[i] = Math.max(0, Math.min(255, data[i] + noise));
+        data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise));
+        data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise));
+      }
+      
+      // Slight contrast boost
+      data[i] = Math.min(255, data[i] * 1.05);
+      data[i + 1] = Math.min(255, data[i + 1] * 1.05);
+      data[i + 2] = Math.min(255, data[i + 2] * 1.05);
+    }
+    
+    ctx.putImageData(imageData, 0, 0);
+    
+    // Add subtle vignette effect
+    ctx.save();
+    const gradient = ctx.createRadialGradient(
+      width / 2, height / 2, 0,
+      width / 2, height / 2, Math.max(width, height) / 1.8
+    );
+    gradient.addColorStop(0, 'rgba(0,0,0,0)');
+    gradient.addColorStop(1, 'rgba(0,0,0,0.2)');
+    ctx.fillStyle = gradient;
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
   };
   
   const viewGallery = () => {
@@ -169,6 +242,11 @@ const CameraScreen = () => {
             ref={canvasRef} 
             className="hidden"
           />
+          
+          {/* Shutter overlay effect */}
+          {isShutterActive && (
+            <div className="absolute inset-0 bg-white z-10 animate-[pulse_300ms_ease-in-out]"></div>
+          )}
         </div>
       </main>
 

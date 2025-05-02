@@ -114,13 +114,13 @@ const GalleryScreen = () => {
               {trip?.photos.map(photo => (
                 <div 
                   key={photo.id} 
-                  className="relative aspect-square overflow-hidden cursor-pointer"
+                  className="relative aspect-square overflow-hidden cursor-pointer film-frame"
                   onClick={() => setSelectedPhoto(photo)}
                 >
                   <img 
                     src={photo.path} 
                     alt={`Photo ${photo.id}`} 
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover vintage-filter"
                   />
                 </div>
               ))}

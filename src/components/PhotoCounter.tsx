@@ -9,7 +9,7 @@ interface PhotoCounterProps {
 const PhotoCounter: React.FC<PhotoCounterProps> = ({ photosLeft, className }) => {
   return (
     <div className={`flex items-center justify-center ${className}`}>
-      <div className="bg-black text-white px-4 py-2 rounded-sm shadow-md border border-white/20">
+      <div className="bg-black/85 text-white px-4 py-2 rounded-sm shadow-md border border-white/20">
         <span className="counter-text font-bold text-xl flex items-center">
           <span className="vintage-filter mr-2">
             {photosLeft < 10 ? `0${photosLeft}` : photosLeft}
