@@ -22,11 +22,11 @@ const FilmCounter: React.FC<FilmCounterProps> = ({ photosLeft, className }) => {
 
   return (
     <div className={cn("flex items-center justify-center", className)}>
-      <div className="bg-black/85 text-white px-4 py-2 rounded-sm shadow-md border border-white/20 flex items-center gap-2">
+      <div className="bg-black/85 text-white px-4 py-2 rounded-sm shadow-md border border-white/20 flex items-center gap-2 transition-transform hover:scale-105">
         <Film 
           className={cn(
-            "h-5 w-5 transition-opacity", 
-            blinkIcon ? "opacity-40" : "opacity-100"
+            "h-5 w-5 transition-all", 
+            blinkIcon ? "opacity-40 scale-95" : "opacity-100 scale-100"
           )} 
         />
         <span className="counter-text font-bold text-xl flex items-center">

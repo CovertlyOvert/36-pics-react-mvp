@@ -7,6 +7,8 @@ import { ArrowLeft, Camera, Image } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import ViewfinderOverlay from "@/components/ViewfinderOverlay";
 import FilmCounter from "@/components/FilmCounter";
+import { triggerHapticFeedback, triggerSuccessHaptic, triggerErrorHaptic } from "@/utils/hapticFeedback";
+import { motion } from "framer-motion";
 
 const CameraScreen = () => {
   const { tripId } = useParams<{ tripId: string }>();
@@ -34,6 +36,7 @@ const CameraScreen = () => {
         description: "Please start a new trip first",
         variant: "destructive",
       });
+      triggerErrorHaptic();
       navigate("/");
       return;
     }
@@ -83,6 +86,9 @@ const CameraScreen = () => {
     setIsTakingPhoto(true);
     
     try {
+      // Trigger haptic feedback
+      triggerHapticFeedback('medium');
+      
       // Play shutter sound
       if (shutterAudioRef.current) {
         shutterAudioRef.current.play().catch(err => console.error("Could not play shutter sound:", err));
@@ -122,15 +128,24 @@ const CameraScreen = () => {
       // Refresh to get latest count
       await refreshTrips();
       
-      toast({
-        title: "Photo taken!",
-        description: activeTrip && activeTrip.photos.length < 35 
-          ? `${35 - activeTrip.photos.length} exposures left` 
-          : "Last exposure!",
-      });
+      // Check if we're approaching the limit
+      if (activeTrip && activeTrip.photos.length === 35) {
+        triggerHapticFeedback('heavy');
+        toast({
+          title: "Last exposure!",
+          description: "You've reached your last photo for this roll",
+        });
+      } else if (activeTrip && activeTrip.photos.length < 35) {
+        toast({
+          title: "Photo taken!",
+          description: `${35 - activeTrip.photos.length} exposures left`,
+        });
+      }
       
       // If this was the 36th photo, go to gallery
       if (activeTrip && activeTrip.photos.length >= 36) {
+        // Special haptic feedback for completing the roll
+        triggerSuccessHaptic();
         toast({
           title: "Film roll complete!",
           description: "You've taken all 36 exposures for this roll",
@@ -147,6 +162,7 @@ const CameraScreen = () => {
       
     } catch (error) {
       console.error("Error taking photo:", error);
+      triggerErrorHaptic();
       toast({
         title: "Error",
         description: "Failed to take photo",
@@ -217,23 +233,47 @@ const CameraScreen = () => {
   const isRollComplete = photosLeft <= 0;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <motion.div 
+      className="min-h-screen bg-background flex flex-col"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       <header className="p-4 flex justify-between items-center">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate("/")}
+        <motion.div
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
         >
-          <ArrowLeft className="h-6 w-6" />
-        </Button>
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate("/")}
+          >
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+        </motion.div>
         
-        <FilmCounter photosLeft={photosLeft} />
-        
-        <Button 
-          variant="ghost" 
-          onClick={viewGallery}
+        <motion.div
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
         >
-          <Image className="h-6 w-6" />
-        </Button>
+          <FilmCounter photosLeft={photosLeft} />
+        </motion.div>
+        
+        <motion.div
+          initial={{ x: 20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Button 
+            variant="ghost" 
+            onClick={viewGallery}
+          >
+            <Image className="h-6 w-6" />
+          </Button>
+        </motion.div>
       </header>
 
       <main className="flex-grow flex flex-col relative">
@@ -264,20 +304,32 @@ const CameraScreen = () => {
 
       <footer className="p-4 flex flex-col items-center">
         {isRollComplete ? (
-          <div className="text-center mb-2">
+          <motion.div 
+            className="text-center mb-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
             <p className="counter-text text-muted-foreground">Roll Complete. Live the moment.</p>
-          </div>
+          </motion.div>
         ) : null}
         
-        <Button
-          className={`rounded-full w-16 h-16 bg-white border-2 border-black hover:bg-gray-100 ${isRollComplete ? 'opacity-50' : ''}`}
-          disabled={isTakingPhoto || isRollComplete}
-          onClick={takePhoto}
+        <motion.div
+          whileTap={{ scale: 0.9 }}
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.4, type: "spring", stiffness: 300 }}
         >
-          <Camera className="h-8 w-8 text-black" />
-        </Button>
+          <Button
+            className={`rounded-full w-16 h-16 bg-white border-2 border-black hover:bg-gray-100 ${isRollComplete ? 'opacity-50' : ''}`}
+            disabled={isTakingPhoto || isRollComplete}
+            onClick={takePhoto}
+          >
+            <Camera className="h-8 w-8 text-black" />
+          </Button>
+        </motion.div>
       </footer>
-    </div>
+    </motion.div>
   );
 };
 

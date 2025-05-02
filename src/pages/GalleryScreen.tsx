@@ -9,6 +9,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Trip, Photo } from "@/models/trip";
 import { format } from "date-fns";
 import PhotoCounter from "@/components/PhotoCounter";
+import { motion, AnimatePresence } from "framer-motion";
+import { triggerHapticFeedback } from "@/utils/hapticFeedback";
 
 const GalleryScreen = () => {
   const { tripId } = useParams<{ tripId: string }>();
@@ -60,18 +62,27 @@ const GalleryScreen = () => {
   }, [tripId, refreshTrips, trips, toast, navigate]);
   
   const handleContinueShooting = () => {
+    triggerHapticFeedback('light');
     if (tripId && !trip?.isCompleted) {
       navigate(`/camera/${tripId}`);
     }
   };
   
   const handleDownloadAll = () => {
+    // Provide haptic feedback
+    triggerHapticFeedback('medium');
+    
     // In a real implementation, this would trigger the download
     // For this demo, we'll just show a toast
     toast({
       title: "Export Started",
       description: `Exporting ${trip?.photos.length} photos from "${trip?.name}"`,
     });
+  };
+  
+  const handlePhotoClick = (photo: Photo) => {
+    triggerHapticFeedback('light');
+    setSelectedPhoto(photo);
   };
   
   const photosLeft = trip ? 36 - trip.photos.length : 0;
@@ -82,38 +93,61 @@ const GalleryScreen = () => {
     : "";
 
   return (
-    <div className="min-h-screen bg-background aged-paper">
+    <motion.div 
+      className="min-h-screen bg-background aged-paper"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       <header className="p-4 flex justify-between items-center">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate("/")}
-          className="hover:bg-muted"
+        <motion.div
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
         >
-          <ArrowLeft className="h-6 w-6" />
-        </Button>
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate("/")}
+            className="hover:bg-muted"
+          >
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+        </motion.div>
         
         <div className="flex-1" />
         
         {!tripComplete && photosLeft > 0 && (
-          <Button 
-            variant="ghost"
-            onClick={handleContinueShooting}
-            className="hover:bg-muted"
+          <motion.div
+            initial={{ x: 20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
           >
-            <Camera className="h-6 w-6" />
-          </Button>
+            <Button 
+              variant="ghost"
+              onClick={handleContinueShooting}
+              className="hover:bg-muted"
+            >
+              <Camera className="h-6 w-6" />
+            </Button>
+          </motion.div>
         )}
         {(tripComplete || photosLeft === 0) && <div className="w-10" />}
       </header>
 
       {!isLoading && trip && (
-        <div className="vintage-container mx-4 mb-6 animate-fade-in">
+        <motion.div 
+          className="vintage-container mx-4 mb-6"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
           <div className="vintage-header mb-6">
             <h1 className="text-2xl font-bold">{trip.name}</h1>
             <div className="vintage-divider"></div>
             <p className="counter-text text-sm text-muted-foreground">{formattedStartDate}</p>
           </div>
-        </div>
+        </motion.div>
       )}
 
       <main className="px-4 pb-20">
@@ -122,57 +156,97 @@ const GalleryScreen = () => {
             <p>Developing film...</p>
           </div>
         ) : trip?.photos.length === 0 ? (
-          <div className="text-center py-16">
+          <motion.div 
+            className="text-center py-16"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
             <p className="text-muted-foreground">No exposures yet</p>
             {!tripComplete && (
-              <Button 
-                className="mt-4 film-button"
-                onClick={handleContinueShooting}
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.6 }}
               >
-                Start taking photos
-              </Button>
+                <Button 
+                  className="mt-4 film-button"
+                  onClick={handleContinueShooting}
+                >
+                  Start taking photos
+                </Button>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         ) : (
           <>
-            <div className="mb-4 flex items-center justify-center">
+            <motion.div 
+              className="mb-4 flex items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
               <PhotoCounter photosLeft={photosLeft} />
-            </div>
+            </motion.div>
             
             <div className={`photo-grid ${showIntro ? 'animate-fade-in' : ''}`}>
               {trip?.photos.map((photo, index) => (
-                <div 
+                <motion.div 
                   key={photo.id} 
-                  className={`relative aspect-square overflow-hidden cursor-pointer film-frame animate-fade-in`}
-                  style={{ 
-                    animationDelay: `${index * 50}ms`,
-                    transform: showIntro ? `rotate(${Math.random() * 6 - 3}deg)` : 'none',
-                    transition: 'transform 0.5s ease-out'
+                  className="relative aspect-square overflow-hidden cursor-pointer film-frame"
+                  initial={{ 
+                    opacity: 0,
+                    y: 20,
+                    rotate: Math.random() * 6 - 3
                   }}
-                  onClick={() => setSelectedPhoto(photo)}
+                  animate={{ 
+                    opacity: 1,
+                    y: 0,
+                    transition: { 
+                      delay: index * 0.05 + 0.2,
+                      duration: 0.4
+                    }
+                  }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  whileHover={{ 
+                    scale: 1.03,
+                    rotate: 0,
+                    transition: { duration: 0.2 }
+                  }}
+                  onClick={() => handlePhotoClick(photo)}
                 >
                   <img 
                     src={photo.path} 
                     alt={`Photo ${photo.id}`} 
                     className="w-full h-full object-cover vintage-filter"
                   />
-                </div>
+                </motion.div>
               ))}
             </div>
             
             {!tripComplete && photosLeft > 0 && (
-              <div className="mt-8 flex justify-center">
+              <motion.div 
+                className="mt-8 flex justify-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+              >
                 <Button 
                   className="film-button"
                   onClick={handleContinueShooting}
                 >
                   Continue Trip ({photosLeft} exposures left)
                 </Button>
-              </div>
+              </motion.div>
             )}
             
             {trip?.photos.length > 0 && (
-              <div className="mt-8 flex justify-center">
+              <motion.div 
+                className="mt-8 flex justify-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9 }}
+              >
                 <Button 
                   className="film-button flex items-center gap-2"
                   onClick={handleDownloadAll}
@@ -180,31 +254,38 @@ const GalleryScreen = () => {
                   <Download size={16} />
                   Export Film Roll
                 </Button>
-              </div>
+              </motion.div>
             )}
           </>
         )}
       </main>
       
-      <Dialog open={!!selectedPhoto} onOpenChange={(open) => !open && setSelectedPhoto(null)}>
-        <DialogContent className="sm:max-w-lg p-0 bg-black">
-          {selectedPhoto && (
-            <div>
-              <img 
-                src={selectedPhoto.path} 
-                alt={`Photo ${selectedPhoto.id}`} 
-                className="w-full h-auto"
-              />
-              <div className="p-4 text-white">
-                <p className="counter-text text-sm opacity-80">
-                  {format(new Date(selectedPhoto.timestamp), "MMM d, yyyy 'at' h:mm aaa")}
-                </p>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
+      <AnimatePresence>
+        {selectedPhoto && (
+          <Dialog open={!!selectedPhoto} onOpenChange={(open) => !open && setSelectedPhoto(null)}>
+            <DialogContent className="sm:max-w-lg p-0 bg-black overflow-hidden">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3, type: "spring", stiffness: 200 }}
+              >
+                <img 
+                  src={selectedPhoto.path} 
+                  alt={`Photo ${selectedPhoto.id}`} 
+                  className="w-full h-auto"
+                />
+                <div className="p-4 text-white">
+                  <p className="counter-text text-sm opacity-80">
+                    {format(new Date(selectedPhoto.timestamp), "MMM d, yyyy 'at' h:mm aaa")}
+                  </p>
+                </div>
+              </motion.div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 
