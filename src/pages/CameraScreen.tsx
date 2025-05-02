@@ -2,10 +2,11 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate } from "react-router-dom";
-import PhotoCounter from "@/components/PhotoCounter";
 import { usePhotoContext } from "@/context/PhotoContext";
 import { ArrowLeft, Camera, Image } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import ViewfinderOverlay from "@/components/ViewfinderOverlay";
+import FilmCounter from "@/components/FilmCounter";
 
 const CameraScreen = () => {
   const { tripId } = useParams<{ tripId: string }>();
@@ -16,6 +17,7 @@ const CameraScreen = () => {
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const [isTakingPhoto, setIsTakingPhoto] = useState(false);
   const [isShutterActive, setIsShutterActive] = useState(false);
+  const [isCameraShaking, setIsCameraShaking] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const shutterAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -23,6 +25,7 @@ const CameraScreen = () => {
   useEffect(() => {
     // Create audio element for shutter sound
     shutterAudioRef.current = new Audio("/shutter-click.mp3");
+    shutterAudioRef.current.volume = 0.7;
     
     // Ensure we have an active trip
     if (!activeTrip) {
@@ -75,7 +78,7 @@ const CameraScreen = () => {
   }, [activeTrip, tripId, navigate]);
   
   const takePhoto = async () => {
-    if (!videoRef.current || !canvasRef.current || !tripId) return;
+    if (!videoRef.current || !canvasRef.current || !tripId || isRollComplete) return;
     
     setIsTakingPhoto(true);
     
@@ -87,6 +90,9 @@ const CameraScreen = () => {
       
       // Trigger shutter animation
       setIsShutterActive(true);
+      
+      // Add camera shake effect
+      setIsCameraShaking(true);
       
       // Wait a moment for the shutter effect
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -119,24 +125,25 @@ const CameraScreen = () => {
       toast({
         title: "Photo taken!",
         description: activeTrip && activeTrip.photos.length < 35 
-          ? `${35 - activeTrip.photos.length} photos left` 
-          : "Last photo!",
+          ? `${35 - activeTrip.photos.length} exposures left` 
+          : "Last exposure!",
       });
       
       // If this was the 36th photo, go to gallery
       if (activeTrip && activeTrip.photos.length >= 36) {
         toast({
-          title: "Trip complete!",
-          description: "You've taken all 36 photos for this trip",
+          title: "Film roll complete!",
+          description: "You've taken all 36 exposures for this roll",
         });
         navigate(`/gallery/${tripId}`);
       }
       
-      // Reset shutter after a brief delay
+      // Reset shutter and camera shake after a brief delay
       setTimeout(() => {
         setIsShutterActive(false);
+        setIsCameraShaking(false);
         setIsTakingPhoto(false);
-      }, 300);
+      }, 400);
       
     } catch (error) {
       console.error("Error taking photo:", error);
@@ -146,6 +153,7 @@ const CameraScreen = () => {
         variant: "destructive",
       });
       setIsShutterActive(false);
+      setIsCameraShaking(false);
       setIsTakingPhoto(false);
     }
   };
@@ -206,6 +214,7 @@ const CameraScreen = () => {
   // Calculate photos left
   const photosLeft = activeTrip ? 36 - activeTrip.photos.length : 0;
   const photosCount = activeTrip ? activeTrip.photos.length : 0;
+  const isRollComplete = photosLeft <= 0;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -217,7 +226,7 @@ const CameraScreen = () => {
           <ArrowLeft className="h-6 w-6" />
         </Button>
         
-        <PhotoCounter photosLeft={photosLeft} />
+        <FilmCounter photosLeft={photosLeft} />
         
         <Button 
           variant="ghost" 
@@ -228,7 +237,7 @@ const CameraScreen = () => {
       </header>
 
       <main className="flex-grow flex flex-col relative">
-        <div className="relative flex-grow flex justify-center items-center bg-black">
+        <div className={`relative flex-grow flex justify-center items-center bg-black ${isCameraShaking ? 'animate-[shake_0.2s_ease-in-out]' : ''}`}>
           {/* Video element for camera preview */}
           <video 
             ref={videoRef} 
@@ -243,17 +252,26 @@ const CameraScreen = () => {
             className="hidden"
           />
           
+          {/* Viewfinder overlay */}
+          <ViewfinderOverlay />
+          
           {/* Shutter overlay effect */}
           {isShutterActive && (
-            <div className="absolute inset-0 bg-white z-10 animate-[pulse_300ms_ease-in-out]"></div>
+            <div className="absolute inset-0 bg-white z-20 animate-[white-flash_300ms_ease-in-out]"></div>
           )}
         </div>
       </main>
 
-      <footer className="p-4 flex justify-center">
+      <footer className="p-4 flex flex-col items-center">
+        {isRollComplete ? (
+          <div className="text-center mb-2">
+            <p className="counter-text text-muted-foreground">Roll Complete. Live the moment.</p>
+          </div>
+        ) : null}
+        
         <Button
-          className="rounded-full w-16 h-16 bg-white border-2 border-black hover:bg-gray-100"
-          disabled={isTakingPhoto || photosLeft === 0}
+          className={`rounded-full w-16 h-16 bg-white border-2 border-black hover:bg-gray-100 ${isRollComplete ? 'opacity-50' : ''}`}
+          disabled={isTakingPhoto || isRollComplete}
           onClick={takePhoto}
         >
           <Camera className="h-8 w-8 text-black" />
