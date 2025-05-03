@@ -1,73 +1,115 @@
-# Welcome to your Lovable project
 
-## Project info
+# 36 Pics
 
-**URL**: https://lovable.dev/projects/a596a96e-71fa-42ab-a650-9d4aa538b535
+A minimalist photo capture web application that limits users to 36 photos per trip, inspired by the nostalgia of film roll cameras.
 
-## How can I edit this code?
+![36 Pics App](https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&q=80&w=1200&h=400)
 
-There are several ways of editing your application.
+## Purpose
 
-**Use Lovable**
+36 Pics is designed to bring back the mindfulness and intention of film photography in our digital age. By limiting each "trip" to only 36 exposures (just like a traditional film roll), the app encourages users to be more selective and thoughtful about the moments they choose to capture.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a596a96e-71fa-42ab-a650-9d4aa538b535) and start prompting.
+## Features
 
-Changes made via Lovable will be committed automatically to this repo.
+- Create themed photo trips with custom names
+- Limited to 36 photos per trip (just like a film roll)
+- Vintage camera interface with film-like visual effects
+- Nostalgic photo gallery with Polaroid-style presentation
+- Haptic feedback that simulates mechanical camera operation
+- Responsive design that works on mobile and desktop devices
 
-**Use your preferred IDE**
+## Tech Stack
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **React 18** - Frontend library
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **React Router** - Navigation and routing
+- **Framer Motion** - Animations
+- **React Query** - Data fetching and state management
+- **shadcn/ui** - UI component library
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Folder Structure
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+36-pics/
+├── public/              # Static assets
+├── src/
+│   ├── components/      # Reusable UI components
+│   ├── context/         # React context providers
+│   ├── hooks/           # Custom React hooks
+│   ├── lib/             # Utility functions
+│   ├── models/          # TypeScript interfaces/types
+│   ├── pages/           # Page components
+│   ├── services/        # API services
+│   ├── styles/          # Global styles
+│   ├── App.tsx          # Main App component
+│   └── main.tsx         # Entry point
+├── index.html           # HTML entry point
+├── package.json         # Dependencies and scripts
+└── vite.config.ts       # Vite configuration
 ```
 
-**Edit a file directly in GitHub**
+## Setup Instructions
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Prerequisites
 
-**Use GitHub Codespaces**
+- Node.js 18.x or later
+- npm or yarn
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Installation
 
-## What technologies are used for this project?
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/36-pics.git
+   cd 36-pics
+   ```
 
-This project is built with:
+2. Install dependencies:
+   ```bash
+   yarn install
+   # or
+   npm install
+   ```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+3. Start the development server:
+   ```bash
+   yarn dev
+   # or
+   npm run dev
+   ```
 
-## How can I deploy this project?
+4. Open your browser and navigate to:
+   ```
+   http://localhost:8080/
+   ```
 
-Simply open [Lovable](https://lovable.dev/projects/a596a96e-71fa-42ab-a650-9d4aa538b535) and click on Share -> Publish.
+## Pushing to GitHub
 
-## Can I connect a custom domain to my Lovable project?
+To push this project to a new GitHub repository:
 
-Yes, you can!
+1. Create a new repository on GitHub (optionally make it private)
+2. Initialize Git in your project (if not already initialized):
+   ```bash
+   git init
+   ```
+3. Add all files to Git:
+   ```bash
+   git add .
+   ```
+4. Commit the files:
+   ```bash
+   git commit -m "Initial commit"
+   ```
+5. Add your GitHub repository as a remote:
+   ```bash
+   git remote add origin https://github.com/yourusername/36-pics.git
+   ```
+6. Push to GitHub:
+   ```bash
+   git push -u origin main
+   ```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## License
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+MIT
