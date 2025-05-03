@@ -20,6 +20,7 @@ const CameraScreen = () => {
   const [isTakingPhoto, setIsTakingPhoto] = useState(false);
   const [isShutterActive, setIsShutterActive] = useState(false);
   const [isCameraShaking, setIsCameraShaking] = useState(false);
+  const [isLoadingFilm, setIsLoadingFilm] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const shutterAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -44,6 +45,12 @@ const CameraScreen = () => {
     // Start camera
     const startCamera = async () => {
       try {
+        // Show loading film animation
+        setIsLoadingFilm(true);
+        
+        // Delay to mimic loading film
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
         const stream = await navigator.mediaDevices.getUserMedia({ 
           video: { facingMode: "environment" }, 
           audio: false 
@@ -53,6 +60,9 @@ const CameraScreen = () => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
+        
+        // Done loading film
+        setIsLoadingFilm(false);
       } catch (error) {
         console.error("Error accessing camera:", error);
         toast({
@@ -214,7 +224,7 @@ const CameraScreen = () => {
       width / 2, height / 2, Math.max(width, height) / 1.8
     );
     gradient.addColorStop(0, 'rgba(0,0,0,0)');
-    gradient.addColorStop(1, 'rgba(0,0,0,0.2)');
+    gradient.addColorStop(1, 'rgba(0,0,0,0.3)');
     ctx.fillStyle = gradient;
     ctx.globalCompositeOperation = 'multiply';
     ctx.fillRect(0, 0, width, height);
@@ -234,12 +244,33 @@ const CameraScreen = () => {
 
   return (
     <motion.div 
-      className="min-h-screen bg-background flex flex-col"
+      className="min-h-screen bg-vintage-DEFAULT flex flex-col"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
     >
+      {isLoadingFilm ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-vintage-sepia z-50">
+          <motion.div 
+            className="text-white"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <p className="counter-text text-xl mb-4">Loading Film Roll...</p>
+            <div className="w-48 h-1 bg-white/20 rounded-full overflow-hidden">
+              <motion.div 
+                className="h-full bg-white" 
+                initial={{ width: 0 }}
+                animate={{ width: '100%' }}
+                transition={{ duration: 1.8 }}
+              />
+            </div>
+          </motion.div>
+        </div>
+      ) : null}
+
       <header className="p-4 flex justify-between items-center">
         <motion.div
           initial={{ x: -20, opacity: 0 }}
@@ -302,7 +333,7 @@ const CameraScreen = () => {
         </div>
       </main>
 
-      <footer className="p-4 flex flex-col items-center">
+      <footer className="p-4 flex flex-col items-center bg-vintage-DEFAULT">
         {isRollComplete ? (
           <motion.div 
             className="text-center mb-2"
@@ -310,7 +341,7 @@ const CameraScreen = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <p className="counter-text text-muted-foreground">Roll Complete. Live the moment.</p>
+            <p className="counter-text text-vintage-brown">Your roll is full. Time to live the moment.</p>
           </motion.div>
         ) : null}
         
@@ -321,11 +352,11 @@ const CameraScreen = () => {
           transition={{ delay: 0.4, type: "spring", stiffness: 300 }}
         >
           <Button
-            className={`rounded-full w-16 h-16 bg-white border-2 border-black hover:bg-gray-100 ${isRollComplete ? 'opacity-50' : ''}`}
+            className={`rounded-full w-16 h-16 bg-white border-2 border-vintage-sepia hover:bg-gray-100 ${isRollComplete ? 'opacity-50' : ''}`}
             disabled={isTakingPhoto || isRollComplete}
             onClick={takePhoto}
           >
-            <Camera className="h-8 w-8 text-black" />
+            <Camera className="h-8 w-8 text-vintage-sepia" />
           </Button>
         </motion.div>
       </footer>

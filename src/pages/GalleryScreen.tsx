@@ -94,7 +94,7 @@ const GalleryScreen = () => {
 
   return (
     <motion.div 
-      className="min-h-screen bg-background aged-paper"
+      className="min-h-screen bg-vintage-DEFAULT aged-paper"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -143,7 +143,7 @@ const GalleryScreen = () => {
           transition={{ delay: 0.3, duration: 0.5 }}
         >
           <div className="vintage-header mb-6">
-            <h1 className="text-2xl font-bold">{trip.name}</h1>
+            <h1 className="text-2xl font-bold text-vintage-brown">{trip.name}</h1>
             <div className="vintage-divider"></div>
             <p className="counter-text text-sm text-muted-foreground">{formattedStartDate}</p>
           </div>
@@ -153,7 +153,7 @@ const GalleryScreen = () => {
       <main className="px-4 pb-20">
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
-            <p>Developing film...</p>
+            <p className="counter-text">Developing film...</p>
           </div>
         ) : trip?.photos.length === 0 ? (
           <motion.div 
@@ -162,7 +162,7 @@ const GalleryScreen = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <p className="text-muted-foreground">No exposures yet</p>
+            <p className="text-muted-foreground counter-text">No exposures yet</p>
             {!tripComplete && (
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
@@ -189,11 +189,11 @@ const GalleryScreen = () => {
               <PhotoCounter photosLeft={photosLeft} />
             </motion.div>
             
-            <div className={`photo-grid ${showIntro ? 'animate-fade-in' : ''}`}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
               {trip?.photos.map((photo, index) => (
                 <motion.div 
                   key={photo.id} 
-                  className="relative aspect-square overflow-hidden cursor-pointer film-frame"
+                  className="relative cursor-pointer polaroid"
                   initial={{ 
                     opacity: 0,
                     y: 20,
@@ -215,11 +215,16 @@ const GalleryScreen = () => {
                   }}
                   onClick={() => handlePhotoClick(photo)}
                 >
-                  <img 
-                    src={photo.path} 
-                    alt={`Photo ${photo.id}`} 
-                    className="w-full h-full object-cover vintage-filter"
-                  />
+                  <div className="relative">
+                    <img 
+                      src={photo.path} 
+                      alt={`Photo ${index + 1}`} 
+                      className="w-full h-auto object-cover aspect-square vintage-filter"
+                    />
+                    <p className="photo-caption counter-text mt-2">
+                      Photo {index + 1} of {trip.photos.length}
+                    </p>
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -275,8 +280,8 @@ const GalleryScreen = () => {
                   alt={`Photo ${selectedPhoto.id}`} 
                   className="w-full h-auto"
                 />
-                <div className="p-4 text-white">
-                  <p className="counter-text text-sm opacity-80">
+                <div className="p-4 text-white counter-text">
+                  <p className="text-sm opacity-80">
                     {format(new Date(selectedPhoto.timestamp), "MMM d, yyyy 'at' h:mm aaa")}
                   </p>
                 </div>

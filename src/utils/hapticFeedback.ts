@@ -9,11 +9,11 @@ export const triggerHapticFeedback = (intensity: 'light' | 'medium' | 'heavy' = 
     return false;
   }
   
-  // Duration in ms based on intensity
+  // Duration in ms based on intensity - more vintage mechanical feel
   const durations = {
-    light: 10,
-    medium: 20,
-    heavy: [20, 30, 50] // Pattern for heavier feedback
+    light: 15,
+    medium: [20, 10, 10], // Subtle mechanical click pattern
+    heavy: [25, 15, 40, 10, 20] // Simulates the winding of film
   };
   
   // Trigger the vibration
@@ -23,22 +23,24 @@ export const triggerHapticFeedback = (intensity: 'light' | 'medium' | 'heavy' = 
 
 /**
  * Provides double haptic feedback pattern for special events
+ * Simulates a film advance lever
  */
 export const triggerSuccessHaptic = () => {
   if (!navigator.vibrate) return false;
   
-  // Short pause between vibrations
-  navigator.vibrate([20, 100, 40]);
+  // Film advance lever feel
+  navigator.vibrate([20, 80, 40, 20, 60]);
   return true;
 };
 
 /**
  * Provides error haptic feedback pattern
+ * Simulates a jammed film advance
  */
 export const triggerErrorHaptic = () => {
   if (!navigator.vibrate) return false;
   
-  // More intense vibration for errors
-  navigator.vibrate([40, 30, 40, 30, 40]);
+  // More intense vibration for errors - feels like a jammed mechanism
+  navigator.vibrate([40, 30, 70, 30, 40]);
   return true;
 };

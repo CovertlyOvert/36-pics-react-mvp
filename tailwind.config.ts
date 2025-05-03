@@ -53,6 +53,13 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				vintage: {
+					DEFAULT: '#FAF3E0', // off-white
+					brown: '#704214', // warm brown
+					caramel: '#B6895B', // muted caramel
+					sepia: '#4A3F35', // deep sepia black
+					sienna: '#A0522D', // burnt sienna
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',

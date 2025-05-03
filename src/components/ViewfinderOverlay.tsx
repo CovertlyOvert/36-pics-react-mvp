@@ -15,6 +15,9 @@ const ViewfinderOverlay: React.FC<ViewfinderOverlayProps> = ({ className }) => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
+      {/* Film grain overlay */}
+      <div className="grain-overlay"></div>
+      
       {/* Center circle */}
       <div className="absolute inset-0 flex items-center justify-center">
         <motion.div 
@@ -58,7 +61,12 @@ const ViewfinderOverlay: React.FC<ViewfinderOverlayProps> = ({ className }) => {
       <div className="absolute bottom-6 right-6 w-8 h-8 border-b-2 border-r-2 border-white/80"></div>
 
       {/* Vignette effect */}
-      <div className="absolute inset-0 rounded-lg bg-gradient-radial from-transparent to-black/40 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-gradient-radial from-transparent to-black/50 pointer-events-none"></div>
+      
+      {/* Exposure data display */}
+      <div className="absolute bottom-8 right-8 bg-black/70 text-white px-2 py-1 rounded-sm border border-white/30">
+        <p className="counter-text text-xs">ISO 400</p>
+      </div>
     </motion.div>
   );
 };
